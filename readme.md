@@ -16,7 +16,7 @@ The output should be something like `v14.17.5`
 ## 💻 Running the project
 1 - Clone this repository to your preferred location with the command:
 ```
-git clone https://github.com/VitorSilvaBueno/drawing-with-friends.git
+git clone https://github.com/SilvaBuenoVitor/drawing-with-friends.git
 ```
 2 - Select drawing-with-friends folder, install the dependencies and start the server.
 ```sh
