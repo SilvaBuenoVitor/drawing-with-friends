@@ -3,14 +3,17 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
-}
-
-#controller{
+  }
+  
+  #controller,
+  #screen {
     width: 100vw;
     height: 100vh;
-}
-
-#screen{
-    width: 100vw;
-    height: 100vh;
-}
+  }
+  
+  #range {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+  }
+  
