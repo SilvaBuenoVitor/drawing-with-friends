@@ -17,6 +17,16 @@
     <!-- Creating the canvas -->
     <canvas id="controller"></canvas>
 
+    <input
+      id="range"
+      type="range"
+      min="1"
+      max="20"
+      value="50"
+      class="slider"
+      id="myRange"
+    />
+
     <!-- Connection script -->
     <script>
         const yourIP = "localhost"
@@ -24,10 +34,10 @@
 
         const controller = document.getElementById("controller")
         const ctx = controller.getContext("2d")
+        const range = document.getElementById("range");
+
         controller.width = window.innerWidth;
         controller.height = window.innerHeight;
-
-        ctx.lineWidth = 3;
 
         // Object that will be sent for drawing purposes
         const pen = {
@@ -35,9 +45,14 @@
             end: { x: 0, y: 0 },
             active: false,
             moving: false,
+            width: 20,
             // Generating a random color in hex
             color: '#' + Math.floor(Math.random() * 16777215).toString(16)
         }
+
+        range.addEventListener("input", () => {
+          pen.width = range.value;
+        });
 
         // drawing script
         const drawLine = (line) => {
@@ -45,7 +60,7 @@
             ctx.moveTo(line.start.x, line.start.y);
             ctx.lineTo(line.end.x, line.end.y);
             ctx.strokeStyle = pen.color;
-            console.log(pen.color);
+            ctx.lineWidth = line.width;
             ctx.stroke();
         }
 
@@ -86,7 +101,11 @@
         const drawing = () => {
             if (pen.active && pen.moving && pen.start) {
                 io.emit('draw', pen)
-                drawLine({ end: pen.end, start: pen.start })
+                drawLine({
+                  end: pen.end,
+                  start: pen.start,
+                  width: pen.width
+                })
                 pen.moving = false
             }
             pen.start = { x: pen.end.x, y: pen.end.y }
@@ -97,5 +116,4 @@
         drawing()
     </script>
 </body>
-
 </html>
