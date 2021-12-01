@@ -1,0 +1,119 @@
+<!-- The controller can draw the shapes that will be displayed -->
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Initialization of external assets -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <title>Controller</title>
+</head>
+
+<body>
+    <!-- Creating the canvas -->
+    <canvas id="controller"></canvas>
+
+    <input
+      id="range"
+      type="range"
+      min="1"
+      max="20"
+      value="50"
+      class="slider"
+      id="myRange"
+    />
+
+    <!-- Connection script -->
+    <script>
+        const yourIP = "localhost"
+        var io = io.connect(`http://${yourIP}:8080/`);
+
+        const controller = document.getElementById("controller")
+        const ctx = controller.getContext("2d")
+        const range = document.getElementById("range");
+
+        controller.width = window.innerWidth;
+        controller.height = window.innerHeight;
+
+        // Object that will be sent for drawing purposes
+        const pen = {
+            start: null,
+            end: { x: 0, y: 0 },
+            active: false,
+            moving: false,
+            width: 20,
+            // Generating a random color in hex
+            color: '#' + Math.floor(Math.random() * 16777215).toString(16)
+        }
+
+        range.addEventListener("input", () => {
+          pen.width = range.value;
+        });
+
+        // drawing script
+        const drawLine = (line) => {
+            ctx.beginPath();
+            ctx.moveTo(line.start.x, line.start.y);
+            ctx.lineTo(line.end.x, line.end.y);
+            ctx.strokeStyle = pen.color;
+            ctx.lineWidth = line.width;
+            ctx.stroke();
+        }
+
+        // Logging of the drawing position
+        controller.onmousemove = (e) => {
+            pen.end.x = e.clientX
+            pen.end.y = e.clientY
+            pen.moving = true
+        }
+
+        // pen.active lifecicle scipts
+        controller.onmousedown = () => { pen.active = true };
+
+        controller.onmouseup = () => { pen.active = false };
+
+        // enable touch suport for drawing
+        controller.addEventListener('touchmove', (e) => {
+            pen.active = true;
+            pen.end.x = e.touches[0].clientX;
+            pen.end.y = e.touches[0].clientY;
+            pen.moving = true
+        })
+
+        // enable touch suport for drawing
+        controller.addEventListener('touchstart', (e) => {
+            pen.end.x = e.touches[0].clientX;
+            pen.end.y = e.touches[0].clientY;
+        });
+
+        // enable touch suport for drawing
+        controller.addEventListener('touchend', (e) => {
+            pen.active = false;
+            pen.end.x = e.touches[0].clientX;
+            pen.end.y = e.touches[0].clientY;
+        });
+
+        // drawing script for sending the lines via socket.io
+        const drawing = () => {
+            if (pen.active && pen.moving && pen.start) {
+                io.emit('draw', pen)
+                drawLine({
+                  end: pen.end,
+                  start: pen.start,
+                  width: pen.width
+                })
+                pen.moving = false
+            }
+            pen.start = { x: pen.end.x, y: pen.end.y }
+            window.requestAnimationFrame(drawing);
+        }
+
+        // method invocation
+        drawing()
+    </script>
+</body>
+</html>
